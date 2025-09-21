@@ -24,10 +24,13 @@ pipeline {
 
         stage('Run Docker Container') {
             steps {
-                // Stop and remove any existing container
-                sh "docker rm -f $CONTAINER_NAME || true"
-                // Run the container with host port mapped to container port 80
-                sh "docker run -d --name $CONTAINER_NAME -p $HOST_PORT:80 $IMAGE_NAME"
+                // Stop and remove any existing container if it exists
+                sh '''
+                if [ $(docker ps -a -q -f name=$CONTAINER_NAME) ]; then
+                    docker rm -f $CONTAINER_NAME
+                fi
+                docker run -d --name $CONTAINER_NAME -p $HOST_PORT:80 $IMAGE_NAME
+                '''
             }
         }
     }
